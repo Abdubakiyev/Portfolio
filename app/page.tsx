@@ -211,18 +211,7 @@ function Skills({ t }: { t: typeof translations.en }) {
 
 /* ─── Projects ─────────────────────────────────────────────── */
 function Projects({ t }: { t: typeof translations.en }) {
-  const [images, setImages] = useState<Record<number, string>>({});
-  const fileRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
-  const [links, setLinks] = useState<Record<number, string>>({});
-
-  const handleImg = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = ev => setImages(prev => ({ ...prev, [idx]: ev.target?.result as string }));
-      reader.readAsDataURL(file);
-    }
-  };
+  const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
 
   return (
     <section id="projects" style={{ padding: "0 clamp(20px,5vw,80px) 100px", position: "relative", zIndex: 2 }}>
@@ -233,37 +222,41 @@ function Projects({ t }: { t: typeof translations.en }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 24 }}>
         {t.projects.list.map((proj, i) => (
           <motion.div key={proj.name} className="card" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6, ease: "easeOut" as const }}>
-            {/* Image area */}
-            <div onClick={() => fileRefs[i]?.current?.click()}
-              style={{ width: "100%", height: 180, borderRadius: 6, background: images[i] ? "none" : "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.1)", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "none", position: "relative", transition: "border-color 0.2s" }}
-              onMouseEnter={e=>(e.currentTarget.style.borderColor="rgba(255,255,255,0.25)")} onMouseLeave={e=>(e.currentTarget.style.borderColor="rgba(255,255,255,0.1)")}>
-              {images[i] ? (
-                <img src={images[i]} alt={proj.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            {/* Static image */}
+            <div style={{ width: "100%", height: 200, borderRadius: 6, overflow: "hidden", marginBottom: 22, position: "relative", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              {proj.image && !imgErrors[i] ? (
+                <img
+                  src={proj.image}
+                  alt={proj.name}
+                  onError={() => setImgErrors(prev => ({ ...prev, [i]: true }))}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
+                  onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.04)")}
+                  onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+                />
               ) : (
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 28, marginBottom: 8, color: "#333" }}>+</div>
-                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: "#444", letterSpacing: "0.12em" }}>{t.projects.imagePlaceholder}</span>
+                <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                  <div style={{ width: 48, height: 48, border: "1px solid #2a2a2a", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: 22, color: "#333" }}>⬡</span>
+                  </div>
+                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: "#333", letterSpacing: "0.12em" }}>{proj.name.toUpperCase()}</span>
                 </div>
               )}
-              <input ref={fileRefs[i]} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleImg(i, e)} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(to top, rgba(17,17,17,0.8), transparent)", pointerEvents: "none" }} />
             </div>
-            {/* Project number */}
             <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 11, color: "#333", letterSpacing: "0.15em", marginBottom: 8 }}>0{i+1}</div>
             <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: "-0.02em", marginBottom: 12, color: "#f0f0f0" }}>{proj.name}</h3>
             <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, color: "#666", lineHeight: 1.8, marginBottom: 16, letterSpacing: "0.02em" }}>{proj.desc}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
               {proj.tech.map(tag => <span key={tag} className="tag">{tag}</span>)}
             </div>
-            {/* Link input */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, padding: "8px 12px" }}>
-              <span style={{ color: "#444", fontSize: 14 }}>⬡</span>
-              <input type="url" value={links[i] || ""} onChange={e => setLinks(prev => ({ ...prev, [i]: e.target.value }))}
-                placeholder={t.projects.linkPlaceholder}
-                style={{ background: "none", border: "none", outline: "none", fontFamily: "'DM Mono',monospace", fontSize: 11, color: "#888", letterSpacing: "0.04em", width: "100%", cursor: "text" }} />
-              {links[i] && (
-                <a href={links[i]} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", fontSize: 12, textDecoration: "none", cursor: "none" }}>→</a>
-              )}
-            </div>
+            {proj.link && (
+              <a href={proj.link} target="_blank" rel="noopener noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "'DM Mono',monospace", fontSize: 11, color: "#888", letterSpacing: "0.06em", textDecoration: "none", padding: "8px 12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, transition: "all 0.2s", cursor: "none" }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#888"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
+                <span style={{ fontSize: 14 }}>⬡</span> View Project →
+              </a>
+            )}
           </motion.div>
         ))}
       </div>
@@ -274,7 +267,7 @@ function Projects({ t }: { t: typeof translations.en }) {
         </a>
       </motion.div>
     </section>
-  );
+  )
 }
 
 /* ─── Experience ─────────────────────────────────────────────── */
