@@ -737,7 +737,7 @@ function Contact({ t }: { t: typeof translations.en }) {
           style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
           {[
             { href: "mailto:abdullohabdubakiyev@gmail.com", label: "✉ Email",    primary: true },
-            { href: "https://t.me/kaneki_798",             label: "⟡ Telegram", primary: false },
+            { href: "https://t.me/Abdubakiyev_9",             label: "⟡ Telegram", primary: false },
             { href: "https://github.com/Abdubakiyev",      label: "⬡ GitHub",   primary: false },
           ].map((b, i) => (
             <motion.a key={i} href={b.href} target={b.primary ? undefined : "_blank"} rel="noopener noreferrer"
